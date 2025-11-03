@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Reviews - ReviewAI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        color: white;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .reviews-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        cursor: pointer;
+    }
+
+    .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .review-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .review-content {
+        padding: 1.5rem;
+    }
+
+    .review-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .review-meta {
+        color: var(--gray);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .badge-positive { background: #d1fae5; color: #065f46; }
+    .badge-negative { background: #fee2e2; color: #991b1b; }
+    .badge-neutral { background: #e2e8f0; color: #475569; }
+    .badge-mixed { background: #fef3c7; color: #92400e; }
+    .badge-defect { background: #fee2e2; color: #991b1b; }
+    .badge-category { background: #e0e7ff; color: #3730a3; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: white;
+    }
+
+    .empty-state svg {
+        margin: 0 auto 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .reviews-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">All Reviews</h1>
+        <p>{{ reviews|length }} total reviews</p>
+    </div>
+    <a href="{{ url_for('upload_page') }}" class="btn btn-primary">+ New Review</a>
+</div>
+
+{% if reviews %}
+<div class="reviews-grid">
+    {% for review in reviews %}
+    <div class="review-card" data-href="{{ url_for('review_detail', review_id=review.image_id) }}">
+        <img src="{{ review.s3_url }}" alt="{{ review.product_name }}" class="review-image">
+        <div class="review-content">
+            <div class="review-title">{{ review.product_name }}</div>
+            <div class="review-meta">
+                {{ review.customer_name }} • {{ review.uploaded_at[:10] }}
+            </div>
+            <div>
+                <span class="badge badge-{{ review.sentiment.lower() }}">
+                    {{ review.sentiment }}
+                </span>
+                <span class="badge badge-category">
+                    {{ review.product_category }}
+                </span>
+                {% if review.has_defects %}
+                <span class="badge badge-defect">
+                    ⚠️ {{ review.defects|length }} Defect(s)
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+    // attach click behavior without inline JS to avoid editor parser errors
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.review-card[data-href]').forEach(card => {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                window.location.href = card.getAttribute('data-href');
+            });
+        });
+    });
+</script>
+{% else %}
+<div class="empty-state">
+    <svg width="80" height="80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <h2 style="margin-bottom: 1rem;">No reviews yet</h2>
+    <p style="margin-bottom: 2rem; color: #cbd5e1;">Start by uploading your first product review</p>
+    <a href="{{ url_for('upload_page') }}" class="btn btn-primary">Upload Review</a>
+</div>
+{% endif %}
+{% endblock %}

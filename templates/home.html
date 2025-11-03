@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}ReviewAI - AI-Powered Product Review System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: white;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .hero h1 .highlight {
+        color: var(--accent);
+    }
+
+    .hero p {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        color: #cbd5e1;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem auto;
+        max-width: 1200px;
+        padding: 0 2rem;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .feature-card h3 {
+        margin-bottom: 0.75rem;
+        color: var(--primary);
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .feature-card p {
+        color: var(--gray);
+        line-height: 1.6;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+        }
+
+        .features {
+            grid-template-columns: 1fr;
+            padding: 0 1rem;
+        }
+
+        .hero {
+            padding: 3rem 1rem;
+        }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .features {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1025px) {
+        .features {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Analyze Product Reviews <span class="highlight">Automatically</span></h1>
+    <p>AI-powered sentiment analysis, defect detection, and product categorization</p>
+    <div class="hero-buttons">
+        <a href="{{ url_for('register_page') }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.8rem 2rem;">Get Started Free</a>
+        <a href="{{ url_for('login_page') }}" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 2rem;">Sign In</a>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h3>AI Image Analysis</h3>
+        <p>Automatically detect product defects using AWS Rekognition</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+            </svg>
+        </div>
+        <h3>Sentiment Analysis</h3>
+        <p>Understand customer emotions with AWS Comprehend</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+        </div>
+        <h3>Analytics Dashboard</h3>
+        <p>Real-time insights and trends visualization</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+        </div>
+        <h3>Auto Categorization</h3>
+        <p>Smart product category detection from images</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </div>
+        <h3>Secure Storage</h3>
+        <p>AWS S3 and DynamoDB for reliable data storage</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+        </div>
+        <h3>Fast Processing</h3>
+        <p>Lightning-fast AI analysis in seconds</p>
+    </div>
+</div>
+{% endblock %}

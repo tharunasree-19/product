@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - ReviewAI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-email {
+        color: var(--gray);
+        font-size: 1.1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .info-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .info-label {
+        color: var(--gray);
+        font-size: 0.9rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--gray);
+    }
+
+    .detail-value {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    .badge-admin {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ user.username[0]|upper }}
+            </div>
+            <div class="profile-name">{{ user.username }}</div>
+            <div class="profile-email">{{ user.email }}</div>
+            {% if user.is_admin %}
+            <span class="badge-admin">👑 Administrator</span>
+            {% endif %}
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-value">{{ user.review_count }}</div>
+                <div class="info-label">Reviews Uploaded</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="info-value">{{ user.created_at[:10] }}</div>
+                <div class="info-label">Member Since</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem; color: var(--primary);">Account Details</h3>
+        
+        <div class="detail-row">
+            <span class="detail-label">User ID</span>
+            <span class="detail-value">{{ user.user_id[:8] }}...</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Username</span>
+            <span class="detail-value">{{ user.username }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Email</span>
+            <span class="detail-value">{{ user.email }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Account Type</span>
+            <span class="detail-value">{{ 'Administrator' if user.is_admin else 'Standard User' }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Total Reviews</span>
+            <span class="detail-value">{{ user.review_count }}</span>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="flex: 1; text-align: center;">
+                Go to Dashboard
+            </a>
+            <a href="{{ url_for('api_logout') }}" class="btn btn-secondary" style="flex: 1; text-align: center;">
+                Logout
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

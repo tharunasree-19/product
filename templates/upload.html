@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Review - ReviewAI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
+
+    .upload-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .upload-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .upload-header h2 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .file-drop-zone {
+        border: 3px dashed var(--border);
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+        background: #f8fafc;
+    }
+
+    .file-drop-zone:hover {
+        border-color: var(--accent);
+        background: #f1f5f9;
+    }
+
+    .file-drop-zone.dragover {
+        border-color: var(--accent);
+        background: #e0f2fe;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .preview-container {
+        margin: 2rem 0;
+        display: none;
+    }
+
+    .preview-img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.3s;
+    }
+
+    .error-message, .success-message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .error-message {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .success-message {
+        background: #d1fae5;
+        color: #065f46;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <div class="upload-header">
+            <h2>Upload Product Review</h2>
+            <p>Upload an image and add details for AI analysis</p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="success-message"></div>
+
+        <div class="file-drop-zone" id="drop-zone">
+            <svg width="64" height="64" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24" style="margin: 0 auto 1rem;">
+                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <h3 style="margin-bottom: 0.5rem;">Click to upload or drag and drop</h3>
+            <p style="color: var(--gray);">PNG, JPG, JPEG or WEBP (Max 16MB)</p>
+            <input type="file" id="file-input" class="file-input" accept=".png,.jpg,.jpeg,.webp">
+        </div>
+
+        <div class="preview-container" id="preview-container">
+            <img id="preview-img" class="preview-img" alt="Preview">
+        </div>
+
+        <form id="upload-form">
+            <div class="form-group">
+                <label for="product_name">Product Name *</label>
+                <input type="text" id="product_name" name="product_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="customer_name">Customer Name</label>
+                <input type="text" id="customer_name" name="customer_name" class="form-control" value="{{ username }}">
+            </div>
+
+            <div class="form-group">
+                <label for="review">Review Text (Optional)</label>
+                <textarea id="review" name="review" class="form-control" placeholder="Describe the product condition, quality, or any issues..."></textarea>
+            </div>
+
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem;" id="submit-btn" disabled>
+                Upload & Analyze
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+    const uploadForm = document.getElementById('upload-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+
+    let selectedFile = null;
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        if (!file) return;
+
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            showError('Invalid file type. Please upload PNG, JPG, JPEG or WEBP');
+            return;
+        }
+
+        if (file.size > 16 * 1024 * 1024) {
+            showError('File too large. Maximum size is 16MB');
+            return;
+        }
+
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewContainer.style.display = 'block';
+            submitBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+        hideError();
+    }
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!selectedFile) {
+            showError('Please select an image');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+        formData.append('product_name', document.getElementById('product_name').value);
+        formData.append('customer_name', document.getElementById('customer_name').value);
+        formData.append('review', document.getElementById('review').value);
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Analyzing...';
+        progressBar.style.display = 'block';
+        progressFill.style.width = '50%';
+        hideError();
+
+        try {
+            const response = await fetch('{{ url_for("api_upload_review") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            progressFill.style.width = '100%';
+
+            if (response.ok) {
+                showSuccess('Review uploaded successfully! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 1500);
+            } else {
+                showError(data.error || 'Upload failed');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload & Analyze';
+                progressBar.style.display = 'none';
+            }
+        } catch (error) {
+            showError('Network error. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Upload & Analyze';
+            progressBar.style.display = 'none';
+        }
+    });
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        successDiv.style.display = 'none';
+    }
+
+    function hideError() {
+        errorDiv.style.display = 'none';
+    }
+
+    function showSuccess(message) {
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+    }
+</script>
+{% endblock %}

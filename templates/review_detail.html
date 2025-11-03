@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}{{ review.product_name }} - ReviewAI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+    }
+
+    .back-button {
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .back-button:hover {
+        color: var(--accent);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .image-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-image {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .info-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-row {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--gray);
+    }
+
+    .info-value {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    /* added to avoid inline Jinja in style attributes */
+    .info-value-danger { color: var(--danger); }
+    .info-value-success { color: var(--success); }
+
+    .labels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .label-badge {
+        background: #f1f5f9;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .defects-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        grid-column: 1 / -1;
+    }
+
+    .defect-item {
+        background: #fef3c7;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+
+    .badge-positive { background: #d1fae5; color: #065f46; }
+    .badge-negative { background: #fee2e2; color: #991b1b; }
+    .badge-neutral { background: #e2e8f0; color: #475569; }
+    .badge-mixed { background: #fef3c7; color: #92400e; }
+
+    .delete-btn {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{{ url_for('reviews_list') }}" class="back-button">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Reviews
+    </a>
+
+    <div class="detail-grid">
+        <div class="image-section">
+            <img src="{{ review.s3_url }}" alt="{{ review.product_name }}" class="product-image">
+            <h2 style="color: var(--primary); margin-bottom: 1rem;">{{ review.product_name }}</h2>
+            <div>
+                <span class="badge badge-{{ review.sentiment.lower() }}">{{ review.sentiment }}</span>
+                <span class="badge" style="background: #e0e7ff; color: #3730a3;">{{ review.product_category }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Review Information</h3>
+            
+            <div class="info-row">
+                <span class="info-label">Customer</span>
+                <span class="info-value">{{ review.customer_name }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Uploaded By</span>
+                <span class="info-value">{{ review.uploaded_by }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Date</span>
+                <span class="info-value">{{ review.uploaded_at[:10] }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Sentiment Score</span>
+                <span class="info-value">{{ "%.2f"|format(review.sentiment_score|float) }}</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Avg Confidence</span>
+                <span class="info-value">{{ "%.2f"|format(review.avg_confidence|float) }}%</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Has Defects</span>
+                <span class="info-value {{ 'info-value-danger' if review.has_defects else 'info-value-success' }}">
+                    {{ 'Yes' if review.has_defects else 'No' }}
+                </span>
+            </div>
+
+            {% if review.review_text %}
+            <div style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 0.5rem; color: var(--gray);">Review Text</h4>
+                <p style="color: #334155; line-height: 1.6;">{{ review.review_text }}</p>
+            </div>
+            {% endif %}
+
+            {% if session.username == review.uploaded_by or session.is_admin %}
+            <button onclick="deleteReview()" class="delete-btn" style="width: 100%; margin-top: 1.5rem;">
+                Delete Review
+            </button>
+            {% endif %}
+        </div>
+
+        <div class="info-section" style="grid-column: 1 / -1;">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Detected Labels</h3>
+            <div class="labels-grid">
+                {% for label in review.labels %}
+                <div class="label-badge">{{ label }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if review.has_defects and review.defects %}
+        <div class="defects-section">
+            <h3 style="margin-bottom: 1rem; color: var(--danger);">⚠️ Detected Defects</h3>
+            {% for defect in review.defects %}
+            <div class="defect-item">
+                <span style="font-weight: 600;">{{ defect.name }}</span>
+                <span>Confidence: {{ "%.2f"|format(defect.confidence) }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    async function deleteReview() {
+        if (!confirm('Are you sure you want to delete this review? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ url_for("api_delete_review", review_id=review.image_id) }}', {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Review deleted successfully');
+                window.location.href = '{{ url_for("reviews_list") }}';
+            } else {
+                alert(data.error || 'Delete failed');
+            }
+        } catch (error) {
+            alert('Network error. Please try again.');
+        }
+    }
+</script>
+{% endblock %}
