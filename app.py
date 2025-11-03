@@ -15,7 +15,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # AWS Configuration
 AWS_REGION = os.environ.get('AWS_REGION', 'ap-south-1')
-BUCKET_NAME = os.environ.get('S3_BUCKET', "product-review-uploads")
+BUCKET_NAME = os.environ.get('S3_BUCKET', "product-review-upload")
 REVIEWS_TABLE = os.environ.get('DYNAMODB_TABLE', "ProductReviews")
 USERS_TABLE = os.environ.get('USERS_TABLE', "ProductUsers")
 
@@ -653,4 +653,5 @@ if __name__ == '__main__':
     print(f"Server will be available at: http://0.0.0.0:5000")
     print("Press CTRL+C to quit\n")
     
+
     app.run(host='0.0.0.0', port=5000, debug=True)
